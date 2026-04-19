@@ -23,10 +23,16 @@ add_executable(fortran_gl_showcase
   src/platform/window.f90
   src/gl/gl_loader.f90
   src/gl/gl_debug.f90
+  src/render/font_data.f90
   src/render/shader.f90
   src/render/fullscreen_quad.f90
+  src/render/menu_background.f90
+  src/render/text_renderer.f90
+  src/app/app_runtime.f90
   src/scene/scene_base.f90
+  src/scene/coming_soon_scene.f90
   src/scene/empty_scene.f90
+  src/scene/menu_scene.f90
   src/scene/scene_registry.f90
   src/app/app.f90
 )
