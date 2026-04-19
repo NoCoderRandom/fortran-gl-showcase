@@ -15,3 +15,4 @@ All notable changes to this project will be documented in this file.
 - Added the Prompt 7A animation foundation: keyframe tracks, timeline loading, camera spline evaluation, `assets/timelines/demo.tl`, and a dev-only `--scene anim_test` path for interpolation validation.
 - Replaced the `Combined Showcase` placeholder with a real 60-second timeline-driven scene featuring fractal birth, Mandelbulb ascent, particle lightwell finale, smooth HDR crossfades, and timeline scrub controls.
 - Added a first offline render CLI path with hidden-window frame export to PNG plus `scripts/encode.sh`, `scripts/encode_gif.sh`, and `scripts/render_gallery.sh`.
+- Replaced the remaining placeholder menu entries with real shader-art scenes: `Procedural Waves`, `HDR Bloom Demo`, `Tunnel Flythrough`, and `Color Field`, and marked them offline-render capable.

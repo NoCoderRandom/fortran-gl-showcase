@@ -16,10 +16,10 @@ stay outside the repo.
 | Fractal Explorer | ![Fractal Explorer](docs/gallery/fractal-explorer.png) |
 | Mandelbulb Cathedral | ![Mandelbulb Cathedral](docs/gallery/mandelbulb-cathedral.png) |
 | Particle Galaxy | ![Particle Galaxy](docs/gallery/particle-galaxy.png) |
-| Procedural Waves | scene implementation pending |
-| HDR Bloom Demo | scene implementation pending |
-| Tunnel Flythrough | scene implementation pending |
-| Color Field | scene implementation pending |
+| Procedural Waves | ![Procedural Waves](docs/gallery/procedural-waves.png) |
+| HDR Bloom Demo | ![HDR Bloom Demo](docs/gallery/hdr-bloom-demo.png) |
+| Tunnel Flythrough | ![Tunnel Flythrough](docs/gallery/tunnel-flythrough.png) |
+| Color Field | ![Color Field](docs/gallery/color-field.png) |
 | Combined Showcase | ![Combined Showcase](docs/gallery/combined-showcase.png) |
 
 ## Why Fortran?
@@ -170,19 +170,23 @@ the combined showcase.
 
 ### Procedural Waves
 
-Menu entry exists. Full scene implementation is still pending.
+Fullscreen shader-art surface with layered wave ridges, fake normals,
+caustic glow, and a restrained cinematic grade.
 
 ### HDR Bloom Demo
 
-Menu entry exists. Full scene implementation is still pending.
+An emissive stress-test scene built to drive the HDR bloom path with
+rings, cores, spokes, and high-value highlights.
 
 ### Tunnel Flythrough
 
-Menu entry exists. Full scene implementation is still pending.
+Palette-driven procedural tunnel motion rendered as a fullscreen shader,
+intended as a compact travel/velocity piece in the menu lineup.
 
 ### Color Field
 
-Menu entry exists. Full scene implementation is still pending.
+An ambient shader-art screensaver with drifting gradients, contour bands,
+and low-intensity idle playback.
 
 ### Combined Showcase
 
@@ -215,6 +219,7 @@ Full guidance: [CONTRIBUTING.md](CONTRIBUTING.md)
 - [docs/FRACTALS_2D.md](docs/FRACTALS_2D.md)
 - [docs/FRACTALS_3D.md](docs/FRACTALS_3D.md)
 - [docs/PARTICLES.md](docs/PARTICLES.md)
+- [docs/SHADER_ART.md](docs/SHADER_ART.md)
 
 ## License
 

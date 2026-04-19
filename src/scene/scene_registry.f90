@@ -1,10 +1,11 @@
 module scene_registry
-  use coming_soon_scene, only: setup_coming_soon_scene
   use scene_anim_test, only: setup_anim_test_scene
   use scene_combined, only: setup_combined_scene
   use scene_fractal2d, only: setup_fractal2d_scene
   use scene_mandelbulb, only: setup_mandelbulb_scene
   use scene_particles, only: setup_particle_scene
+  use scene_shader_art, only: setup_color_field_scene, setup_hdr_bloom_scene
+  use scene_shader_art, only: setup_procedural_waves_scene, setup_tunnel_flythrough_scene
   use scene_base, only: scene_type
   implicit none (type, external)
   private
@@ -53,14 +54,14 @@ contains
     this%entries(2)%factory => make_mandelbulb_cathedral
     call set_entry_metadata(this%entries(3), "particle_galaxy", "Particle Galaxy", "GPU-simulated particle field", .true.)
     this%entries(3)%factory => make_particle_galaxy
-    call set_entry_metadata(this%entries(4), "procedural_waves", "Procedural Waves", "shader-art surface", .false.)
+    call set_entry_metadata(this%entries(4), "procedural_waves", "Procedural Waves", "shader-art surface", .true.)
     this%entries(4)%factory => make_procedural_waves
-    call set_entry_metadata(this%entries(5), "hdr_bloom_demo", "HDR Bloom Demo", "bright emissive shapes with bloom", .false.)
+    call set_entry_metadata(this%entries(5), "hdr_bloom_demo", "HDR Bloom Demo", "bright emissive shapes with bloom", .true.)
     this%entries(5)%factory => make_hdr_bloom_demo
     call set_entry_metadata(this%entries(6), "tunnel_flythrough", "Tunnel Flythrough", &
-      "procedural tube with palette animation", .false.)
+      "procedural tube with palette animation", .true.)
     this%entries(6)%factory => make_tunnel_flythrough
-    call set_entry_metadata(this%entries(7), "color_field", "Color Field", "pure shader art, ambient screensaver", .false.)
+    call set_entry_metadata(this%entries(7), "color_field", "Color Field", "pure shader art, ambient screensaver", .true.)
     this%entries(7)%factory => make_color_field
     call set_entry_metadata(this%entries(8), "combined_showcase", "Combined Showcase", "flagship animated piece", .true.)
     this%entries(8)%factory => make_combined_showcase
@@ -169,25 +170,25 @@ contains
   subroutine make_procedural_waves(scene)
     class(scene_type), allocatable, intent(out) :: scene
 
-    call setup_coming_soon_scene(scene, "procedural_waves", "Procedural Waves")
+    call setup_procedural_waves_scene(scene)
   end subroutine make_procedural_waves
 
   subroutine make_hdr_bloom_demo(scene)
     class(scene_type), allocatable, intent(out) :: scene
 
-    call setup_coming_soon_scene(scene, "hdr_bloom_demo", "HDR Bloom Demo")
+    call setup_hdr_bloom_scene(scene)
   end subroutine make_hdr_bloom_demo
 
   subroutine make_tunnel_flythrough(scene)
     class(scene_type), allocatable, intent(out) :: scene
 
-    call setup_coming_soon_scene(scene, "tunnel_flythrough", "Tunnel Flythrough")
+    call setup_tunnel_flythrough_scene(scene)
   end subroutine make_tunnel_flythrough
 
   subroutine make_color_field(scene)
     class(scene_type), allocatable, intent(out) :: scene
 
-    call setup_coming_soon_scene(scene, "color_field", "Color Field")
+    call setup_color_field_scene(scene)
   end subroutine make_color_field
 
   subroutine make_combined_showcase(scene)
