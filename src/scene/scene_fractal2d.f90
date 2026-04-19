@@ -2,7 +2,7 @@ module scene_fractal2d
   use, intrinsic :: iso_c_binding, only: c_double, c_float, c_int, c_loc
   use app_runtime, only: runtime_draw_text, runtime_elapsed, runtime_framebuffer_size, runtime_is_down, runtime_measure_text
   use app_runtime, only: runtime_mouse_delta, runtime_mouse_is_down, runtime_request_menu, runtime_scroll_delta
-  use app_runtime, only: runtime_text_begin_frame, runtime_was_pressed
+  use app_runtime, only: runtime_is_offline, runtime_text_begin_frame, runtime_was_pressed
   use core_kinds, only: real64
   use core_text_file, only: read_text_file
   use gl_loader, only: gl_active_texture, gl_bind_texture, gl_clamp_to_edge, gl_delete_textures, gl_float, gl_gen_textures
@@ -308,6 +308,7 @@ contains
     call gl_uniform1i(this%orbit_uniform, int(this%orbit_mode, c_int))
     call this%quad%draw()
 
+    if (runtime_is_offline()) return
     if (.not. this%show_hud) return
     call runtime_text_begin_frame()
     write (fractal_line, '(a,a)') "FRACTAL: ", trim(fractal_name(this%fractal_kind))

@@ -4,7 +4,7 @@ module scene_combined
   use anim_timeline, only: timeline_type
   use anim_tiny_parser, only: load_timeline_file
   use app_runtime, only: runtime_draw_text, runtime_elapsed, runtime_framebuffer_size, runtime_measure_text
-  use app_runtime, only: runtime_request_menu, runtime_text_begin_frame, runtime_was_pressed
+  use app_runtime, only: runtime_is_offline, runtime_request_menu, runtime_text_begin_frame, runtime_was_pressed
   use core_kinds, only: real64
   use core_text_file, only: read_text_file
   use gl_loader, only: gl_active_texture, gl_bind_framebuffer, gl_bind_texture, gl_bind_vertex_array, gl_blend
@@ -503,6 +503,7 @@ contains
     integer :: bar_w
     integer :: playhead_x
 
+    if (runtime_is_offline()) return
     call runtime_text_begin_frame()
     if (time_value < act2_start) then
       line = "ACT I  BIRTH"

@@ -16,6 +16,7 @@ module app_runtime
   integer, save :: runtime_framebuffer_width = 0
   integer, save :: runtime_framebuffer_height = 0
   real(real64), save :: runtime_elapsed_seconds = 0.0_real64
+  logical, save :: runtime_offline_mode = .false.
   character(len=name_len), save :: runtime_scene_names(max_runtime_scenes) = ""
   character(len=96), save :: runtime_display_names(max_runtime_scenes) = ""
   character(len=96), save :: runtime_short_descriptions(max_runtime_scenes) = ""
@@ -29,6 +30,7 @@ module app_runtime
   public :: runtime_framebuffer_size
   public :: runtime_log_screenshot_stub
   public :: runtime_is_down
+  public :: runtime_is_offline
   public :: runtime_measure_text
   public :: runtime_mouse_is_down
   public :: runtime_mouse_delta
@@ -45,18 +47,21 @@ module app_runtime
   public :: runtime_text_begin_frame
   public :: runtime_was_pressed
 contains
-  subroutine runtime_begin_frame(input, text, framebuffer_width, framebuffer_height, elapsed_seconds)
+  subroutine runtime_begin_frame(input, text, framebuffer_width, framebuffer_height, elapsed_seconds, offline_mode)
     type(input_state), target, intent(in) :: input
     type(text_renderer), target, intent(inout) :: text
     integer, intent(in), value :: framebuffer_width
     integer, intent(in), value :: framebuffer_height
     real(real64), intent(in), value :: elapsed_seconds
+    logical, intent(in), optional :: offline_mode
 
     runtime_input => input
     runtime_text => text
     runtime_framebuffer_width = framebuffer_width
     runtime_framebuffer_height = framebuffer_height
     runtime_elapsed_seconds = elapsed_seconds
+    runtime_offline_mode = .false.
+    if (present(offline_mode)) runtime_offline_mode = offline_mode
     request_quit = .false.
     request_menu = .false.
     requested_scene_name = ""
@@ -208,6 +213,10 @@ contains
   real(real64) function runtime_elapsed() result(value)
     value = runtime_elapsed_seconds
   end function runtime_elapsed
+
+  logical function runtime_is_offline() result(value)
+    value = runtime_offline_mode
+  end function runtime_is_offline
 
   subroutine runtime_log_screenshot_stub()
     call log_info("screenshot: not yet implemented")

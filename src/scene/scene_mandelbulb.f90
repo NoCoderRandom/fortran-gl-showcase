@@ -2,7 +2,7 @@ module scene_mandelbulb
   use, intrinsic :: iso_c_binding, only: c_double, c_float, c_int
   use app_runtime, only: runtime_draw_text, runtime_elapsed, runtime_framebuffer_size, runtime_measure_text
   use app_runtime, only: runtime_mouse_delta, runtime_mouse_is_down, runtime_request_menu, runtime_scroll_delta
-  use app_runtime, only: runtime_text_begin_frame, runtime_was_pressed
+  use app_runtime, only: runtime_is_offline, runtime_text_begin_frame, runtime_was_pressed
   use core_kinds, only: real64
   use core_text_file, only: read_text_file
   use gl_loader, only: gl_uniform1i, gl_uniform2f, gl_uniform3f
@@ -197,6 +197,7 @@ contains
     call gl_uniform1i(this%max_steps_uniform, int(max_steps_for_preset(this%preset), c_int))
     call this%quad%draw()
 
+    if (runtime_is_offline()) return
     if (.not. this%show_hud) return
     call runtime_text_begin_frame()
     write (fractal_line, '(a,a)') "FRACTAL: ", trim(fractal_name(this%fractal_kind))

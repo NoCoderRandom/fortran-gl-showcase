@@ -93,7 +93,9 @@ contains
       app%elapsed_seconds = target_time
       call app%window%get_framebuffer_size(framebuffer_width, framebuffer_height)
       call gl_viewport(0_c_int, 0_c_int, framebuffer_width, framebuffer_height)
-      call runtime_begin_frame(app%input, app%text, int(framebuffer_width), int(framebuffer_height), app%elapsed_seconds)
+      call runtime_begin_frame( &
+        app%input, app%text, int(framebuffer_width), int(framebuffer_height), app%elapsed_seconds, .true. &
+      )
       call app%current_scene%update(delta_seconds)
       call app%post%begin_scene_target(int(framebuffer_width), int(framebuffer_height))
       call app%current_scene%render()
@@ -186,7 +188,9 @@ contains
     this%elapsed_seconds = this%elapsed_seconds + this%clock%delta_seconds
     call this%window%get_framebuffer_size(framebuffer_width, framebuffer_height)
     call gl_viewport(0_c_int, 0_c_int, framebuffer_width, framebuffer_height)
-    call runtime_begin_frame(this%input, this%text, int(framebuffer_width), int(framebuffer_height), this%elapsed_seconds)
+    call runtime_begin_frame( &
+      this%input, this%text, int(framebuffer_width), int(framebuffer_height), this%elapsed_seconds, .false. &
+    )
     call this%current_scene%update(this%clock%delta_seconds)
     call this%post%begin_scene_target(int(framebuffer_width), int(framebuffer_height))
     call this%current_scene%render()

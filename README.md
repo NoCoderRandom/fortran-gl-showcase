@@ -7,20 +7,20 @@
 
 ## Gallery
 
-The offline renderer is in place and real gallery capture is now
-practical. Committed gallery images are still being curated under
-`docs/gallery/`.
+The gallery below is captured from the built-in offline renderer. Only
+curated stills are committed under `docs/gallery/`; bulk render dumps
+stay outside the repo.
 
 | Scene | Preview |
 | --- | --- |
-| Fractal Explorer | `docs/gallery/` pending curated capture |
-| Mandelbulb Cathedral | `docs/gallery/` pending curated capture |
-| Particle Galaxy | `docs/gallery/` pending curated capture |
+| Fractal Explorer | ![Fractal Explorer](docs/gallery/fractal-explorer.png) |
+| Mandelbulb Cathedral | ![Mandelbulb Cathedral](docs/gallery/mandelbulb-cathedral.png) |
+| Particle Galaxy | ![Particle Galaxy](docs/gallery/particle-galaxy.png) |
 | Procedural Waves | scene implementation pending |
 | HDR Bloom Demo | scene implementation pending |
 | Tunnel Flythrough | scene implementation pending |
 | Color Field | scene implementation pending |
-| Combined Showcase | `docs/gallery/` pending curated capture |
+| Combined Showcase | ![Combined Showcase](docs/gallery/combined-showcase.png) |
 
 ## Why Fortran?
 

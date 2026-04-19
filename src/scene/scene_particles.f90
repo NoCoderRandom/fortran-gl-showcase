@@ -2,7 +2,7 @@ module scene_particles
   use, intrinsic :: iso_c_binding, only: c_double, c_float, c_int, c_intptr_t, c_loc, c_null_ptr, c_ptr
   use app_runtime, only: runtime_draw_text, runtime_framebuffer_size, runtime_measure_text, runtime_mouse_delta
   use app_runtime, only: runtime_mouse_is_down, runtime_request_menu, runtime_scroll_delta, runtime_text_begin_frame
-  use app_runtime, only: runtime_was_pressed
+  use app_runtime, only: runtime_is_offline, runtime_was_pressed
   use core_kinds, only: real64
   use core_text_file, only: read_text_file
   use gl_loader, only: gl_active_texture, gl_array_buffer, gl_bind_buffer, gl_bind_buffer_base, gl_bind_texture
@@ -237,6 +237,7 @@ contains
     call system_clock(finish_ticks, clock_rate)
     this%last_render_ms = 1000.0_real64 * real(finish_ticks - start_ticks, real64) / real(max(1, clock_rate), real64)
 
+    if (runtime_is_offline()) return
     if (.not. this%show_hud) return
     call runtime_text_begin_frame()
     write (count_line, '(a,i0)') "COUNT: ", this%particle_count
