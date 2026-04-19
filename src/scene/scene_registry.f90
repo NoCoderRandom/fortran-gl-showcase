@@ -1,5 +1,5 @@
 module scene_registry
-  use empty_scene, only: empty_scene_type
+  use coming_soon_scene, only: setup_coming_soon_scene
   use scene_base, only: scene_type
   implicit none (type, external)
   private
@@ -9,49 +9,145 @@ module scene_registry
   public :: scene_descriptor
   public :: scene_registry_type
 
+  abstract interface
+    subroutine scene_factory(scene)
+      import :: scene_type
+      class(scene_type), allocatable, intent(out) :: scene
+    end subroutine scene_factory
+  end interface
+
   type :: scene_descriptor
     character(len=:), allocatable :: name
-    character(len=:), allocatable :: summary
+    character(len=:), allocatable :: display_name
+    character(len=:), allocatable :: short_description
+    procedure(scene_factory), pointer, nopass :: factory => null()
   end type scene_descriptor
 
   type :: scene_registry_type
     integer :: count = 0
     type(scene_descriptor) :: entries(max_scenes)
   contains
+    procedure :: count_entries => scene_registry_count_entries
     procedure :: create => scene_registry_create
-    procedure :: default_scene_name => scene_registry_default_scene_name
+    procedure :: describe => scene_registry_describe
     procedure :: register_defaults => scene_registry_register_defaults
   end type scene_registry_type
 contains
   subroutine scene_registry_register_defaults(this)
     class(scene_registry_type), intent(inout) :: this
 
-    this%count = 1
-    this%entries(1)%name = "empty_scene"
-    this%entries(1)%summary = "Dark-gray clear pass used for bootstrapping."
+    this%count = 8
+    call set_entry_metadata(this%entries(1), "fractal_explorer", "Fractal Explorer", "Mandelbrot / Julia / Burning Ship")
+    this%entries(1)%factory => make_fractal_explorer
+    call set_entry_metadata(this%entries(2), "mandelbulb_cathedral", "Mandelbulb Cathedral", &
+      "3D raymarched fractal, cinematic light")
+    this%entries(2)%factory => make_mandelbulb_cathedral
+    call set_entry_metadata(this%entries(3), "particle_galaxy", "Particle Galaxy", "GPU-simulated particle field")
+    this%entries(3)%factory => make_particle_galaxy
+    call set_entry_metadata(this%entries(4), "procedural_waves", "Procedural Waves", "shader-art surface")
+    this%entries(4)%factory => make_procedural_waves
+    call set_entry_metadata(this%entries(5), "hdr_bloom_demo", "HDR Bloom Demo", "bright emissive shapes with bloom")
+    this%entries(5)%factory => make_hdr_bloom_demo
+    call set_entry_metadata(this%entries(6), "tunnel_flythrough", "Tunnel Flythrough", &
+      "procedural tube with palette animation")
+    this%entries(6)%factory => make_tunnel_flythrough
+    call set_entry_metadata(this%entries(7), "color_field", "Color Field", "pure shader art, ambient screensaver")
+    this%entries(7)%factory => make_color_field
+    call set_entry_metadata(this%entries(8), "combined_showcase", "Combined Showcase", "flagship animated piece")
+    this%entries(8)%factory => make_combined_showcase
   end subroutine scene_registry_register_defaults
-
-  subroutine scene_registry_default_scene_name(this, value)
-    class(scene_registry_type), intent(in) :: this
-    character(len=*), intent(out) :: value
-
-    if (this%count <= 0) error stop "Scene registry is empty."
-    value = this%entries(1)%name
-  end subroutine scene_registry_default_scene_name
 
   subroutine scene_registry_create(this, name, scene)
     class(scene_registry_type), intent(in) :: this
     character(len=*), intent(in) :: name
     class(scene_type), allocatable, intent(out) :: scene
+    integer :: index
 
-    if (this%count <= 0) error stop "Scene registry is empty."
+    do index = 1, this%count
+      if (trim(this%entries(index)%name) == trim(name)) then
+        call this%entries(index)%factory(scene)
+        return
+      end if
+    end do
 
-    select case (trim(name))
-    case ("empty_scene")
-      allocate(empty_scene_type :: scene)
-    case default
-      error stop "Unknown scene requested."
-    end select
+    error stop "Unknown scene requested."
   end subroutine scene_registry_create
-end module scene_registry
 
+  subroutine scene_registry_describe(this, index, name, display_name, short_description)
+    class(scene_registry_type), intent(in) :: this
+    integer, intent(in), value :: index
+    character(len=*), intent(out) :: name
+    character(len=*), intent(out) :: display_name
+    character(len=*), intent(out) :: short_description
+
+    if (index < 1 .or. index > this%count) error stop "Scene registry index out of range."
+    name = this%entries(index)%name
+    display_name = this%entries(index)%display_name
+    short_description = this%entries(index)%short_description
+  end subroutine scene_registry_describe
+
+  integer function scene_registry_count_entries(this) result(count)
+    class(scene_registry_type), intent(in) :: this
+
+    count = this%count
+  end function scene_registry_count_entries
+
+  subroutine set_entry_metadata(entry, name, display_name, short_description)
+    type(scene_descriptor), intent(inout) :: entry
+    character(len=*), intent(in) :: name
+    character(len=*), intent(in) :: display_name
+    character(len=*), intent(in) :: short_description
+
+    entry%name = name
+    entry%display_name = display_name
+    entry%short_description = short_description
+  end subroutine set_entry_metadata
+
+  subroutine make_fractal_explorer(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "fractal_explorer", "Fractal Explorer")
+  end subroutine make_fractal_explorer
+
+  subroutine make_mandelbulb_cathedral(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "mandelbulb_cathedral", "Mandelbulb Cathedral")
+  end subroutine make_mandelbulb_cathedral
+
+  subroutine make_particle_galaxy(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "particle_galaxy", "Particle Galaxy")
+  end subroutine make_particle_galaxy
+
+  subroutine make_procedural_waves(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "procedural_waves", "Procedural Waves")
+  end subroutine make_procedural_waves
+
+  subroutine make_hdr_bloom_demo(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "hdr_bloom_demo", "HDR Bloom Demo")
+  end subroutine make_hdr_bloom_demo
+
+  subroutine make_tunnel_flythrough(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "tunnel_flythrough", "Tunnel Flythrough")
+  end subroutine make_tunnel_flythrough
+
+  subroutine make_color_field(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "color_field", "Color Field")
+  end subroutine make_color_field
+
+  subroutine make_combined_showcase(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_coming_soon_scene(scene, "combined_showcase", "Combined Showcase")
+  end subroutine make_combined_showcase
+end module scene_registry

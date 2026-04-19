@@ -4,7 +4,13 @@ module platform_input
   private
 
   integer(c_int), parameter, public :: key_escape = 256_c_int
+  integer(c_int), parameter, public :: key_enter = 257_c_int
+  integer(c_int), parameter, public :: key_up = 265_c_int
+  integer(c_int), parameter, public :: key_down = 264_c_int
+  integer(c_int), parameter, public :: key_w = 87_c_int
+  integer(c_int), parameter, public :: key_s = 83_c_int
   integer(c_int), parameter, public :: key_f11 = 300_c_int
+  integer(c_int), parameter, public :: key_f12 = 301_c_int
   integer(c_int), parameter :: glfw_press = 1_c_int
   integer(c_int), parameter :: glfw_repeat = 2_c_int
   integer(c_int), parameter :: key_first = 0_c_int
@@ -60,4 +66,3 @@ contains
     value = key >= key_first .and. key <= key_last .and. this%pressed(key)
   end function input_was_pressed
 end module platform_input
-

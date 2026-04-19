@@ -10,6 +10,7 @@ module empty_scene
 
   type, extends(scene_type) :: empty_scene_type
   contains
+    procedure :: destroy => empty_scene_destroy
     procedure :: get_name => empty_scene_get_name
     procedure :: init => empty_scene_init
     procedure :: render => empty_scene_render
@@ -31,6 +32,12 @@ contains
     call this%get_name(name)
     if (len_trim(name) == 0) error stop "Empty scene name missing."
   end subroutine empty_scene_init
+
+  subroutine empty_scene_destroy(this)
+    class(empty_scene_type), intent(inout) :: this
+
+    if (.false.) print *, same_type_as(this, this)
+  end subroutine empty_scene_destroy
 
   subroutine empty_scene_render(this)
     class(empty_scene_type), intent(inout) :: this

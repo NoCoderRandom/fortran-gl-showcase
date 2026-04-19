@@ -7,6 +7,7 @@ module scene_base
 
   type, abstract :: scene_type
   contains
+    procedure(scene_destroy), deferred :: destroy
     procedure(scene_name), deferred :: get_name
     procedure(scene_init), deferred :: init
     procedure(scene_render), deferred :: render
@@ -25,6 +26,11 @@ module scene_base
       class(scene_type), intent(inout) :: this
     end subroutine scene_init
 
+    subroutine scene_destroy(this)
+      import :: scene_type
+      class(scene_type), intent(inout) :: this
+    end subroutine scene_destroy
+
     subroutine scene_render(this)
       import :: scene_type
       class(scene_type), intent(inout) :: this
@@ -37,4 +43,3 @@ module scene_base
     end subroutine scene_update
   end interface
 end module scene_base
-

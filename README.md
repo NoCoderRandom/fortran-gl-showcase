@@ -32,18 +32,27 @@ cmake --build build
 ./build/bin/fortran_gl_showcase
 ```
 
-## Scene List
+## Scenes
 
-- `empty_scene`: foundation clear pass used to validate the app loop and controls.
+- `Fractal Explorer`: Mandelbrot / Julia / Burning Ship
+- `Mandelbulb Cathedral`: 3D raymarched fractal, cinematic light
+- `Particle Galaxy`: GPU-simulated particle field
+- `Procedural Waves`: shader-art surface
+- `HDR Bloom Demo`: bright emissive shapes with bloom
+- `Tunnel Flythrough`: procedural tube with palette animation
+- `Color Field`: pure shader art, ambient screensaver
+- `Combined Showcase`: flagship animated piece
 
 ## Controls
 
 | Key | Action |
 | --- | --- |
-| `Esc` | Quit |
+| `W` / `S` or `Up` / `Down` | Navigate the main menu |
+| `Enter` | Launch the selected scene |
+| `Esc` | Return to the menu, or quit from the menu |
 | `F11` | Toggle fullscreen |
+| `F12` | Log the screenshot placeholder message |
 
 ## Gallery
 
 Screenshots belong in `docs/gallery/`.
-
