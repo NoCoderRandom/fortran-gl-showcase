@@ -1,11 +1,11 @@
 module menu_scene
   use, intrinsic :: iso_c_binding, only: c_float
   use app_runtime, only: runtime_draw_text, runtime_elapsed, runtime_framebuffer_size, runtime_measure_text, runtime_request_quit, &
-    runtime_request_scene, runtime_scene_count, runtime_scene_info, runtime_was_pressed
+    runtime_request_scene, runtime_scene_count, runtime_scene_info, runtime_text_begin_frame, runtime_was_pressed
   use core_kinds, only: real64
   use platform_input, only: key_down, key_enter, key_escape, key_s, key_up, key_w
   use render_menu_background, only: menu_background_renderer
-  use scene_base, only: scene_type
+  use scene_base, only: post_settings_t, scene_type, tone_aces
   implicit none (type, external)
   private
 
@@ -17,6 +17,7 @@ module menu_scene
   contains
     procedure :: destroy => menu_destroy
     procedure :: get_name => menu_get_name
+    procedure :: get_post_settings => menu_get_post_settings
     procedure :: init => menu_init
     procedure :: render => menu_render
     procedure :: update => menu_update
@@ -42,6 +43,18 @@ contains
     this%selected_index = 1
     call this%background%initialize()
   end subroutine menu_init
+
+  function menu_get_post_settings(this) result(settings)
+    class(menu_scene_type), intent(in) :: this
+    type(post_settings_t) :: settings
+
+    if (.false.) print *, same_type_as(this, this)
+    settings%bloom_strength = 0.3
+    settings%bloom_threshold = 1.1
+    settings%tone_map_mode = tone_aces
+    settings%vignette_strength = 0.2
+    settings%grain_strength = 0.01
+  end function menu_get_post_settings
 
   subroutine menu_update(this, delta_seconds)
     class(menu_scene_type), intent(inout) :: this
@@ -83,7 +96,7 @@ contains
     character(len=*), parameter :: footer_text = &
       "W/S OR UP/DN  NAVIGATE   ENTER  SELECT   ESC  BACK   F11  FULLSCREEN   F12  SCREENSHOT"
     character(len=*), parameter :: subtitle_text = &
-      "MODERN FORTRAN 2018 / 2023  *  OPENGL 4.6  *  WSL2 + NVIDIA"
+      "MODERN FORTRAN 2018 / 2023  *  OPENGL 4.6/4.3 PREFERRED  *  WSL2 + NVIDIA"
     character(len=64) :: scene_name
     character(len=96) :: display_name
     character(len=96) :: short_description
@@ -105,26 +118,27 @@ contains
     body = [0.84_c_float, 0.87_c_float, 0.92_c_float, 1.0_c_float]
     dim = [0.54_c_float, 0.58_c_float, 0.66_c_float, 1.0_c_float]
 
+    call runtime_text_begin_frame()
     call runtime_draw_text("FORTRAN GL SHOWCASE", &
-      (width - runtime_measure_text("FORTRAN GL SHOWCASE", 4)) / 2, height / 7, 4, accent)
+      (width - runtime_measure_text("FORTRAN GL SHOWCASE", 5)) / 2, height / 7, 5, accent)
     call runtime_draw_text(subtitle_text, &
-      max(24, (width - runtime_measure_text(subtitle_text, 1)) / 2), &
-      height / 7 + 56, 1, dim)
+      max(24, (width - runtime_measure_text(subtitle_text, 2)) / 2), &
+      height / 7 + 72, 2, dim)
 
     scene_count = runtime_scene_count()
     do index = 1, scene_count
       call runtime_scene_info(index, scene_name, display_name, short_description)
       write (line, '(i1,a,1x,a,2x,a,1x,a)') index, ".", trim(display_name), "-", trim(short_description)
-      entry_y = height / 3 + (index - 1) * 28
+      entry_y = height / 3 + (index - 1) * 42
       if (index == this%selected_index) then
-        call runtime_draw_text("> "//trim(line), 70, entry_y, 1, accent)
+        call runtime_draw_text("> "//trim(line), 70, entry_y, 2, accent)
       else
-        call runtime_draw_text("  "//trim(line), 70, entry_y, 1, body)
+        call runtime_draw_text("  "//trim(line), 70, entry_y, 2, body)
       end if
     end do
 
-    footer_x = max(16, (width - runtime_measure_text(footer_text, 1)) / 2)
+    footer_x = max(16, (width - runtime_measure_text(footer_text, 2)) / 2)
     call runtime_draw_text(footer_text, &
-      footer_x, height - 42, 1, dim)
+      footer_x, height - 56, 2, dim)
   end subroutine menu_render
 end module menu_scene

@@ -16,3 +16,10 @@
 - Purpose: window creation, OpenGL context management, and input polling
 - Modifications: none
 
+## Ashima noise
+
+- Version: shader snippet attribution only
+- License: MIT
+- Upstream URL: https://github.com/ashima/webgl-noise
+- Purpose: simplex-noise basis for the compute-shader curl perturbation in `Particle Galaxy`
+- Modifications: adapted into `assets/shaders/particles_step.comp`

@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config gfortran \
+            libglfw3-dev libx11-dev libxi-dev libxrandr-dev \
+            libxcursor-dev libxinerama-dev mesa-utils ffmpeg xvfb
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Render gallery smoke
+        run: xvfb-run -s "-screen 0 160x90x24" bash scripts/render_gallery.sh /tmp/fgs-gallery 4 1 160 90
+
+      - name: Assert PNGs exist
+        run: |
+          test -f /tmp/fgs-gallery/fractal_explorer/frame_000000.png
+          test -f /tmp/fgs-gallery/mandelbulb_cathedral/frame_000000.png
+          test -f /tmp/fgs-gallery/particle_galaxy/frame_000000.png
+          test -f /tmp/fgs-gallery/combined_showcase/frame_000000.png

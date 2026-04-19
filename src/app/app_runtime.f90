@@ -1,4 +1,5 @@
 module app_runtime
+  use, intrinsic :: iso_c_binding, only: c_double, c_int
   use core_kinds, only: real64
   use core_logger, only: log_info
   use platform_input, only: input_state
@@ -27,10 +28,16 @@ module app_runtime
   public :: runtime_elapsed
   public :: runtime_framebuffer_size
   public :: runtime_log_screenshot_stub
+  public :: runtime_is_down
   public :: runtime_measure_text
+  public :: runtime_mouse_is_down
+  public :: runtime_mouse_delta
+  public :: runtime_mouse_position
+  public :: runtime_mouse_was_pressed
   public :: runtime_request_menu
   public :: runtime_request_quit
   public :: runtime_request_scene
+  public :: runtime_scroll_delta
   public :: runtime_set_scene_catalog
   public :: runtime_scene_count
   public :: runtime_scene_info
@@ -119,6 +126,51 @@ contains
     if (.not. associated(runtime_input)) error stop "Input state not bound."
     value = runtime_input%was_pressed(key)
   end function runtime_was_pressed
+
+  logical function runtime_is_down(key) result(value)
+    integer(c_int), intent(in), value :: key
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    value = runtime_input%is_down(key)
+  end function runtime_is_down
+
+  logical function runtime_mouse_was_pressed(button) result(value)
+    integer(c_int), intent(in), value :: button
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    value = runtime_input%mouse_was_pressed(button)
+  end function runtime_mouse_was_pressed
+
+  logical function runtime_mouse_is_down(button) result(value)
+    integer(c_int), intent(in), value :: button
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    value = runtime_input%mouse_is_down(button)
+  end function runtime_mouse_is_down
+
+  subroutine runtime_mouse_position(x, y)
+    real(c_double), intent(out) :: x
+    real(c_double), intent(out) :: y
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    call runtime_input%mouse_position(x, y)
+  end subroutine runtime_mouse_position
+
+  subroutine runtime_mouse_delta(dx, dy)
+    real(c_double), intent(out) :: dx
+    real(c_double), intent(out) :: dy
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    call runtime_input%mouse_delta(dx, dy)
+  end subroutine runtime_mouse_delta
+
+  subroutine runtime_scroll_delta(dx, dy)
+    real(c_double), intent(out) :: dx
+    real(c_double), intent(out) :: dy
+
+    if (.not. associated(runtime_input)) error stop "Input state not bound."
+    call runtime_input%scroll_delta(dx, dy)
+  end subroutine runtime_scroll_delta
 
   subroutine runtime_request_quit()
     request_quit = .true.

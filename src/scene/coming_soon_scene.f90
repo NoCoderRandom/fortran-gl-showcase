@@ -1,6 +1,6 @@
 module coming_soon_scene
   use, intrinsic :: iso_c_binding, only: c_float
-  use app_runtime, only: runtime_draw_text, runtime_framebuffer_size, runtime_measure_text
+  use app_runtime, only: runtime_draw_text, runtime_framebuffer_size, runtime_measure_text, runtime_text_begin_frame
   use app_runtime, only: runtime_request_menu, runtime_was_pressed
   use core_kinds, only: real64
   use gl_loader, only: gl_clear, gl_clear_color, gl_color_buffer_bit
@@ -84,11 +84,12 @@ contains
     title_color = [0.95_c_float, 0.88_c_float, 0.56_c_float, 1.0_c_float]
     subtitle_color = [0.76_c_float, 0.79_c_float, 0.86_c_float, 1.0_c_float]
 
-    title_x = max(32, (width - runtime_measure_text(trim(this%display_name), 4)) / 2)
-    subtitle_x = max(32, (width - runtime_measure_text("COMING SOON", 2)) / 2)
-    call runtime_draw_text(trim(this%display_name), title_x, height / 3, 4, title_color)
-    call runtime_draw_text("COMING SOON", subtitle_x, height / 3 + 72, 2, subtitle_color)
-    call runtime_draw_text("ESC RETURNS TO THE MENU", max(32, (width - runtime_measure_text("ESC RETURNS TO THE MENU", 1)) / 2), &
-      height / 3 + 132, 1, subtitle_color)
+    call runtime_text_begin_frame()
+    title_x = max(32, (width - runtime_measure_text(trim(this%display_name), 5)) / 2)
+    subtitle_x = max(32, (width - runtime_measure_text("COMING SOON", 3)) / 2)
+    call runtime_draw_text(trim(this%display_name), title_x, height / 3, 5, title_color)
+    call runtime_draw_text("COMING SOON", subtitle_x, height / 3 + 88, 3, subtitle_color)
+    call runtime_draw_text("ESC RETURNS TO THE MENU", max(32, (width - runtime_measure_text("ESC RETURNS TO THE MENU", 2)) / 2), &
+      height / 3 + 164, 2, subtitle_color)
   end subroutine coming_soon_render
 end module coming_soon_scene

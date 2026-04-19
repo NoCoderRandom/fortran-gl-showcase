@@ -2,6 +2,7 @@ module render_shader
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_loc, c_null_char, c_null_ptr, c_ptr
   use core_logger, only: log_error
   use gl_loader, only: gl_attach_shader, gl_compile_shader, gl_compile_status, gl_create_program
+  use gl_loader, only: gl_compute_shader
   use gl_loader, only: gl_create_shader, gl_delete_program, gl_delete_shader, gl_fragment_shader
   use gl_loader, only: gl_get_program_info_log, gl_get_program_iv, gl_get_shader_info_log, gl_get_shader_iv
   use gl_loader, only: gl_get_uniform_location, gl_info_log_length, gl_link_program, gl_link_status
@@ -15,6 +16,7 @@ module render_shader
     integer(c_int) :: program_id = 0_c_int
   contains
     procedure :: build => shader_program_build
+    procedure :: build_compute => shader_program_build_compute
     procedure :: destroy => shader_program_destroy
     procedure :: is_valid => shader_program_is_valid
     procedure :: uniform => shader_program_uniform
@@ -48,6 +50,29 @@ contains
     call gl_delete_shader(vertex_shader_id)
     call gl_delete_shader(fragment_shader_id)
   end subroutine shader_program_build
+
+  subroutine shader_program_build_compute(this, compute_source, label)
+    class(shader_program), intent(inout) :: this
+    character(len=*), intent(in) :: compute_source
+    character(len=*), intent(in) :: label
+    integer(c_int) :: compute_shader_id
+    integer(c_int), target :: link_ok
+
+    call this%destroy()
+    compute_shader_id = compile_stage(gl_compute_shader, compute_source, trim(label)//" compute")
+
+    this%program_id = gl_create_program()
+    if (this%program_id == 0_c_int) error stop "Program creation failed."
+    call gl_attach_shader(this%program_id, compute_shader_id)
+    call gl_link_program(this%program_id)
+    call gl_get_program_iv(this%program_id, gl_link_status, c_loc(link_ok))
+    if (link_ok /= gl_true) then
+      call log_error(trim(label)//": "//trim(fetch_program_log(this%program_id)))
+      error stop "Program link failed."
+    end if
+
+    call gl_delete_shader(compute_shader_id)
+  end subroutine shader_program_build_compute
 
   subroutine shader_program_destroy(this)
     class(shader_program), intent(inout) :: this

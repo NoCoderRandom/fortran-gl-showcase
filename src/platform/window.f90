@@ -8,7 +8,9 @@ module platform_window
   integer(c_int), parameter :: glfw_context_version_minor = int(z'00022003', c_int)
   integer(c_int), parameter :: glfw_opengl_profile = int(z'00022008', c_int)
   integer(c_int), parameter :: glfw_opengl_core_profile = int(z'00032001', c_int)
+  integer(c_int), parameter :: glfw_opengl_forward_compat = int(z'00022006', c_int)
   integer(c_int), parameter :: glfw_opengl_debug_context = int(z'00022027', c_int)
+  integer(c_int), parameter :: glfw_visible = int(z'00020004', c_int)
 
   public :: glfw_window
 
@@ -53,6 +55,9 @@ module platform_window
       integer(c_int), value :: hint
       integer(c_int), value :: value
     end subroutine glfwWindowHint
+
+    subroutine glfwDefaultWindowHints() bind(C, name="glfwDefaultWindowHints")
+    end subroutine glfwDefaultWindowHints
 
     type(c_ptr) function glfwCreateWindow(width, height, title, monitor, share) bind(C, name="glfwCreateWindow")
       import :: c_char, c_int, c_ptr
@@ -139,29 +144,63 @@ module platform_window
     end subroutine glfwGetFramebufferSize
   end interface
 contains
-  subroutine glfw_window_initialize(this, width, height, title, debug_context)
+  subroutine glfw_window_initialize(this, width, height, title, debug_context, visible, swap_interval)
     class(glfw_window), intent(inout) :: this
     integer(c_int), intent(in), value :: width
     integer(c_int), intent(in), value :: height
     character(len=*), intent(in) :: title
     logical, intent(in), value :: debug_context
+    logical, intent(in), optional :: visible
+    integer(c_int), intent(in), optional :: swap_interval
     character(kind=c_char, len=:), allocatable :: c_title
+    logical :: window_visible
+    integer(c_int) :: present_interval
 
     if (glfwInit() == 0_c_int) error stop "GLFW initialization failed."
-    call glfwWindowHint(glfw_context_version_major, 4_c_int)
-    call glfwWindowHint(glfw_context_version_minor, 6_c_int)
-    call glfwWindowHint(glfw_opengl_profile, glfw_opengl_core_profile)
-    call glfwWindowHint(glfw_opengl_debug_context, merge(1_c_int, 0_c_int, debug_context))
+    window_visible = .true.
+    if (present(visible)) window_visible = visible
+    present_interval = 1_c_int
+    if (present(swap_interval)) present_interval = swap_interval
 
     c_title = to_c_string(title)
-    this%handle = glfwCreateWindow(width, height, c_title, c_null_ptr, c_null_ptr)
+    this%handle = create_window_with_context(width, height, c_title, debug_context, window_visible, 4_c_int, 6_c_int)
+    if (.not. c_associated(this%handle)) then
+      this%handle = create_window_with_context(width, height, c_title, debug_context, window_visible, 4_c_int, 3_c_int)
+    end if
+    if (.not. c_associated(this%handle)) then
+      this%handle = create_window_with_context(width, height, c_title, debug_context, window_visible, 4_c_int, 1_c_int)
+    end if
+    if (.not. c_associated(this%handle)) then
+      this%handle = create_window_with_context(width, height, c_title, debug_context, window_visible, 3_c_int, 3_c_int)
+    end if
     if (.not. c_associated(this%handle)) error stop "Window creation failed."
 
     this%windowed_width = width
     this%windowed_height = height
     call glfwMakeContextCurrent(this%handle)
-    call glfwSwapInterval(1_c_int)
+    call glfwSwapInterval(present_interval)
   end subroutine glfw_window_initialize
+
+  function create_window_with_context(width, height, title, debug_context, visible, major, minor) result(handle)
+    integer(c_int), intent(in), value :: width
+    integer(c_int), intent(in), value :: height
+    character(kind=c_char), intent(in) :: title(*)
+    logical, intent(in), value :: debug_context
+    logical, intent(in), value :: visible
+    integer(c_int), intent(in), value :: major
+    integer(c_int), intent(in), value :: minor
+    type(c_ptr) :: handle
+
+    call glfwDefaultWindowHints()
+    call glfwWindowHint(glfw_context_version_major, major)
+    call glfwWindowHint(glfw_context_version_minor, minor)
+    call glfwWindowHint(glfw_opengl_profile, glfw_opengl_core_profile)
+    call glfwWindowHint(glfw_opengl_forward_compat, 1_c_int)
+    call glfwWindowHint(glfw_opengl_debug_context, merge(1_c_int, 0_c_int, debug_context))
+    call glfwWindowHint(glfw_visible, merge(1_c_int, 0_c_int, visible))
+
+    handle = glfwCreateWindow(width, height, title, c_null_ptr, c_null_ptr)
+  end function create_window_with_context
 
   subroutine glfw_window_poll_events(this)
     class(glfw_window), intent(inout) :: this
@@ -256,4 +295,3 @@ contains
     c_text = trim(text) // c_null_char
   end function to_c_string
 end module platform_window
-

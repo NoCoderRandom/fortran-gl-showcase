@@ -8,21 +8,35 @@ module gl_loader
   integer(c_int), parameter, public :: gl_blend = int(z'0BE2', c_int)
   integer(c_int), parameter, public :: gl_clamp_to_edge = int(z'812F', c_int)
   integer(c_int), parameter, public :: gl_color_buffer_bit = int(z'00004000', c_int)
+  integer(c_int), parameter, public :: gl_color_attachment0 = int(z'8CE0', c_int)
   integer(c_int), parameter, public :: gl_compile_status = int(z'8B81', c_int)
+  integer(c_int), parameter, public :: gl_compute_shader = int(z'91B9', c_int)
   integer(c_int), parameter, public :: gl_dynamic_draw = int(z'88E8', c_int)
   integer(c_int), parameter, public :: gl_false = 0_c_int
   integer(c_int), parameter, public :: gl_float = int(z'1406', c_int)
   integer(c_int), parameter, public :: gl_fragment_shader = int(z'8B30', c_int)
+  integer(c_int), parameter, public :: gl_framebuffer = int(z'8D40', c_int)
+  integer(c_int), parameter, public :: gl_framebuffer_binding = int(z'8CA6', c_int)
+  integer(c_int), parameter, public :: gl_framebuffer_complete = int(z'8CD5', c_int)
   integer(c_int), parameter, public :: gl_info_log_length = int(z'8B84', c_int)
   integer(c_int), parameter, public :: gl_link_status = int(z'8B82', c_int)
   integer(c_int), parameter, public :: gl_linear = int(z'2601', c_int)
   integer(c_int), parameter, public :: gl_nearest = int(z'2600', c_int)
+  integer(c_int), parameter, public :: gl_one = 1_c_int
   integer(c_int), parameter, public :: gl_one_minus_src_alpha = int(z'0303', c_int)
+  integer(c_int), parameter, public :: gl_points = int(z'0000', c_int)
+  integer(c_int), parameter, public :: gl_program_point_size = int(z'8642', c_int)
   integer(c_int), parameter, public :: gl_red = int(z'1903', c_int)
+  integer(c_int), parameter, public :: gl_rgba = int(z'1908', c_int)
+  integer(c_int), parameter, public :: gl_rgba16f = int(z'881A', c_int)
   integer(c_int), parameter, public :: gl_r8 = int(z'8229', c_int)
+  integer(c_int), parameter, public :: gl_shader_storage_barrier_bit = int(z'00002000', c_int)
+  integer(c_int), parameter, public :: gl_shader_storage_buffer = int(z'90D2', c_int)
   integer(c_int), parameter, public :: gl_src_alpha = int(z'0302', c_int)
   integer(c_int), parameter, public :: gl_static_draw = int(z'88E4', c_int)
   integer(c_int), parameter, public :: gl_texture0 = int(z'84C0', c_int)
+  integer(c_int), parameter, public :: gl_texture1 = int(z'84C1', c_int)
+  integer(c_int), parameter, public :: gl_texture2 = int(z'84C2', c_int)
   integer(c_int), parameter, public :: gl_texture_2d = int(z'0DE1', c_int)
   integer(c_int), parameter, public :: gl_texture_mag_filter = int(z'2800', c_int)
   integer(c_int), parameter, public :: gl_texture_min_filter = int(z'2801', c_int)
@@ -36,12 +50,15 @@ module gl_loader
   public :: gl_active_texture
   public :: gl_attach_shader
   public :: gl_bind_buffer
+  public :: gl_bind_buffer_base
+  public :: gl_bind_framebuffer
   public :: gl_bind_texture
   public :: gl_bind_vertex_array
   public :: gl_blend_func
   public :: gl_buffer_data
   public :: gl_buffer_sub_data
   public :: gl_clear
+  public :: gl_check_framebuffer_status
   public :: gl_clear_color
   public :: gl_compile_shader
   public :: gl_create_program
@@ -51,25 +68,34 @@ module gl_loader
   public :: gl_delete_shader
   public :: gl_delete_textures
   public :: gl_delete_vertex_arrays
+  public :: gl_delete_framebuffers
+  public :: gl_disable
+  public :: gl_dispatch_compute
   public :: gl_draw_arrays
   public :: gl_enable
   public :: gl_enable_vertex_attrib_array
+  public :: gl_framebuffer_texture_2d
   public :: gl_gen_buffers
+  public :: gl_gen_framebuffers
   public :: gl_gen_textures
   public :: gl_gen_vertex_arrays
+  public :: gl_get_integerv
   public :: gl_get_program_info_log
   public :: gl_get_program_iv
+  public :: gl_read_pixels
   public :: gl_get_shader_info_log
   public :: gl_get_shader_iv
   public :: gl_get_uniform_location
   public :: gl_link_program
   public :: gl_load
+  public :: gl_memory_barrier
   public :: gl_shader_source
   public :: gl_tex_image_2d
   public :: gl_tex_parameteri
   public :: gl_uniform1f
   public :: gl_uniform1i
   public :: gl_uniform2f
+  public :: gl_uniform3f
   public :: gl_uniform4f
   public :: gl_use_program
   public :: gl_vertex_attrib_pointer
@@ -92,6 +118,19 @@ module gl_loader
       integer(c_int), value :: target
       integer(c_int), value :: buffer
     end subroutine gl_bind_buffer
+
+    subroutine gl_bind_buffer_base(target, index, buffer) bind(C, name="glBindBufferBase")
+      import :: c_int
+      integer(c_int), value :: target
+      integer(c_int), value :: index
+      integer(c_int), value :: buffer
+    end subroutine gl_bind_buffer_base
+
+    subroutine gl_bind_framebuffer(target, framebuffer) bind(C, name="glBindFramebuffer")
+      import :: c_int
+      integer(c_int), value :: target
+      integer(c_int), value :: framebuffer
+    end subroutine gl_bind_framebuffer
 
     subroutine gl_bind_texture(target, texture) bind(C, name="glBindTexture")
       import :: c_int
@@ -130,6 +169,11 @@ module gl_loader
       import :: c_int
       integer(c_int), value :: mask
     end subroutine gl_clear
+
+    integer(c_int) function gl_check_framebuffer_status(target) bind(C, name="glCheckFramebufferStatus")
+      import :: c_int
+      integer(c_int), value :: target
+    end function gl_check_framebuffer_status
 
     subroutine gl_clear_color(red, green, blue, alpha) bind(C, name="glClearColor")
       import :: c_float
@@ -175,11 +219,29 @@ module gl_loader
       type(c_ptr), value :: textures
     end subroutine gl_delete_textures
 
+    subroutine gl_delete_framebuffers(count, framebuffers) bind(C, name="glDeleteFramebuffers")
+      import :: c_int, c_ptr
+      integer(c_int), value :: count
+      type(c_ptr), value :: framebuffers
+    end subroutine gl_delete_framebuffers
+
     subroutine gl_delete_vertex_arrays(count, arrays) bind(C, name="glDeleteVertexArrays")
       import :: c_int, c_ptr
       integer(c_int), value :: count
       type(c_ptr), value :: arrays
     end subroutine gl_delete_vertex_arrays
+
+    subroutine gl_disable(cap) bind(C, name="glDisable")
+      import :: c_int
+      integer(c_int), value :: cap
+    end subroutine gl_disable
+
+    subroutine gl_dispatch_compute(num_groups_x, num_groups_y, num_groups_z) bind(C, name="glDispatchCompute")
+      import :: c_int
+      integer(c_int), value :: num_groups_x
+      integer(c_int), value :: num_groups_y
+      integer(c_int), value :: num_groups_z
+    end subroutine gl_dispatch_compute
 
     subroutine gl_draw_arrays(mode, first, count) bind(C, name="glDrawArrays")
       import :: c_int
@@ -198,11 +260,27 @@ module gl_loader
       integer(c_int), value :: index
     end subroutine gl_enable_vertex_attrib_array
 
+    subroutine gl_framebuffer_texture_2d(target, attachment, textarget, texture, level) &
+      bind(C, name="glFramebufferTexture2D")
+      import :: c_int
+      integer(c_int), value :: target
+      integer(c_int), value :: attachment
+      integer(c_int), value :: textarget
+      integer(c_int), value :: texture
+      integer(c_int), value :: level
+    end subroutine gl_framebuffer_texture_2d
+
     subroutine gl_gen_buffers(count, buffers) bind(C, name="glGenBuffers")
       import :: c_int, c_ptr
       integer(c_int), value :: count
       type(c_ptr), value :: buffers
     end subroutine gl_gen_buffers
+
+    subroutine gl_gen_framebuffers(count, framebuffers) bind(C, name="glGenFramebuffers")
+      import :: c_int, c_ptr
+      integer(c_int), value :: count
+      type(c_ptr), value :: framebuffers
+    end subroutine gl_gen_framebuffers
 
     subroutine gl_gen_textures(count, textures) bind(C, name="glGenTextures")
       import :: c_int, c_ptr
@@ -215,6 +293,12 @@ module gl_loader
       integer(c_int), value :: count
       type(c_ptr), value :: arrays
     end subroutine gl_gen_vertex_arrays
+
+    subroutine gl_get_integerv(pname, data) bind(C, name="glGetIntegerv")
+      import :: c_int, c_ptr
+      integer(c_int), value :: pname
+      type(c_ptr), value :: data
+    end subroutine gl_get_integerv
 
     subroutine gl_get_program_info_log(program, max_length, length_written, info_log) bind(C, name="glGetProgramInfoLog")
       import :: c_char, c_int, c_ptr
@@ -239,6 +323,17 @@ module gl_loader
       character(kind=c_char), intent(out) :: info_log(*)
     end subroutine gl_get_shader_info_log
 
+    subroutine gl_read_pixels(x, y, width, height, format, data_type, pixels) bind(C, name="glReadPixels")
+      import :: c_int, c_ptr
+      integer(c_int), value :: x
+      integer(c_int), value :: y
+      integer(c_int), value :: width
+      integer(c_int), value :: height
+      integer(c_int), value :: format
+      integer(c_int), value :: data_type
+      type(c_ptr), value :: pixels
+    end subroutine gl_read_pixels
+
     subroutine gl_get_shader_iv(shader, pname, params) bind(C, name="glGetShaderiv")
       import :: c_int, c_ptr
       integer(c_int), value :: shader
@@ -256,6 +351,11 @@ module gl_loader
       import :: c_int
       integer(c_int), value :: program
     end subroutine gl_link_program
+
+    subroutine gl_memory_barrier(barriers) bind(C, name="glMemoryBarrier")
+      import :: c_int
+      integer(c_int), value :: barriers
+    end subroutine gl_memory_barrier
 
     subroutine gl_shader_source(shader, count, strings, lengths) bind(C, name="glShaderSource")
       import :: c_int, c_ptr
@@ -304,6 +404,14 @@ module gl_loader
       real(c_float), value :: x
       real(c_float), value :: y
     end subroutine gl_uniform2f
+
+    subroutine gl_uniform3f(location, x, y, z) bind(C, name="glUniform3f")
+      import :: c_float, c_int
+      integer(c_int), value :: location
+      real(c_float), value :: x
+      real(c_float), value :: y
+      real(c_float), value :: z
+    end subroutine gl_uniform3f
 
     subroutine gl_uniform4f(location, x, y, z, w) bind(C, name="glUniform4f")
       import :: c_float, c_int
