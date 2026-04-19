@@ -1,0 +1,15 @@
+build/
+build-release/
+.cache/
+out/
+*.o
+*.mod
+*.smod
+*.png
+!docs/gallery/*.png
+*.mp4
+.vscode/
+.idea/
+.codex
+local.cmake
+*:Zone.Identifier
