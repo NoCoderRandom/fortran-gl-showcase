@@ -44,12 +44,20 @@ project more interesting both technically and educationally.
 Target environment: WSL2 Ubuntu 22.04/24.04 on Windows 11.
 
 ```bash
+git clone https://github.com/NoCoderRandom/fortran-gl-showcase.git
+cd fortran-gl-showcase
+sudo ./scripts/install_deps.sh
+./scripts/build.sh
+./run.sh
+```
+
+Manual equivalent:
+
+```bash
 sudo apt install build-essential cmake ninja-build pkg-config git gh \
                  gfortran libglfw3-dev libx11-dev libxi-dev libxrandr-dev \
                  libxcursor-dev libxinerama-dev mesa-utils ffmpeg
 
-git clone https://github.com/NoCoderRandom/fortran-gl-showcase.git
-cd fortran-gl-showcase
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/bin/fortran_gl_showcase
