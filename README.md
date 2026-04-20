@@ -46,8 +46,8 @@ Target environment: WSL2 Ubuntu 22.04/24.04 on Windows 11.
 ```bash
 git clone https://github.com/NoCoderRandom/fortran-gl-showcase.git
 cd fortran-gl-showcase
-sudo ./scripts/install_deps.sh
-./scripts/build.sh
+sudo ./install_deps.sh
+./build.sh
 ./run.sh
 ```
 

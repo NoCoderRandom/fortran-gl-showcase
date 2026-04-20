@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "This script uses apt and must be run with sudo." >&2
-  echo "Usage: sudo ./scripts/install_deps.sh" >&2
+  echo "Usage: sudo ./install_deps.sh" >&2
   exit 1
 fi
 

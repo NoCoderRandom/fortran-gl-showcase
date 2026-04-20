@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root_dir=$(cd "$(dirname "$0")/.." && pwd)
+root_dir=$(cd "$(dirname "$0")" && pwd)
 build_dir="${BUILD_DIR:-${root_dir}/build}"
 build_type="${BUILD_TYPE:-Debug}"
 generator="${CMAKE_GENERATOR:-Ninja}"
