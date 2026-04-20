@@ -23,7 +23,7 @@ void main() {
   clip.x *= u_resolution.y / u_resolution.x;
 
   gl_Position = vec4(clip, 0.0, 1.0);
-  gl_PointSize = clamp(18.0 * inv_z, 1.0, 24.0);
+  gl_PointSize = clamp(14.0 * inv_z, 1.0, 16.0);
   v_color = a_color;
   v_age = clamp(a_position_age.w / u_lifetime, 0.0, 1.0);
 }

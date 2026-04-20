@@ -78,7 +78,7 @@ contains
 
     if (request%fps <= 0 .or. request%seconds <= 0.0_real64) error stop "Invalid render request."
     call app%initialize(int(request%width, c_int), int(request%height, c_int), visible=.false., swap_interval=0_c_int)
-    if (.not. render_scene_allowed(trim(request%scene_name))) then
+    if (.not. app%registry%is_offline_capable(trim(request%scene_name))) then
       error stop "Requested scene is not marked offline-capable."
     end if
     call app%open_scene(trim(request%scene_name))
@@ -239,15 +239,4 @@ contains
     if (status /= 0) error stop "Failed to create output directory."
   end subroutine ensure_directory
 
-  logical function render_scene_allowed(scene_name) result(allowed)
-    character(len=*), intent(in) :: scene_name
-
-    select case (trim(scene_name))
-    case ("fractal_explorer", "mandelbulb_cathedral", "particle_galaxy", "procedural_waves", &
-        "hdr_bloom_demo", "tunnel_flythrough", "color_field", "combined_showcase")
-      allowed = .true.
-    case default
-      allowed = .false.
-    end select
-  end function render_scene_allowed
 end module showcase_app

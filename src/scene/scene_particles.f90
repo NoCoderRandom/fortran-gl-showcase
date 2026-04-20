@@ -22,6 +22,9 @@ module scene_particles
 
   integer, parameter :: floats_per_particle = 12
   integer, parameter :: particle_stride_bytes = 48
+  integer, parameter :: particle_count_galaxy = 320000
+  integer, parameter :: particle_count_vortex = 520000
+  integer, parameter :: particle_count_nebula = 900000
   integer, parameter :: preset_galaxy = 1
   integer, parameter :: preset_vortex = 2
   integer, parameter :: preset_nebula = 3
@@ -289,11 +292,11 @@ contains
     this%preset = preset
     select case (preset)
     case (preset_vortex)
-      this%particle_count = 1000000
+      this%particle_count = particle_count_vortex
     case (preset_nebula)
-      this%particle_count = 2000000
+      this%particle_count = particle_count_nebula
     case default
-      this%particle_count = 500000
+      this%particle_count = particle_count_galaxy
     end select
     call upload_palette(this)
     call reseed_particles(this)
@@ -376,17 +379,17 @@ contains
 
     select case (preset)
     case (preset_vortex)
-      r = 0.35_real64 + 0.65_real64 * t
-      g = 0.06_real64 + 0.72_real64 * t
-      b = 0.02_real64 + 0.18_real64 * t
+      r = 0.18_real64 + 0.80_real64 * t
+      g = 0.04_real64 + 0.44_real64 * t + 0.12_real64 * sin(3.14159_real64 * t)
+      b = 0.03_real64 + 0.26_real64 * (1.0_real64 - t) + 0.18_real64 * t
     case (preset_nebula)
-      r = 0.10_real64 + 0.46_real64 * t
-      g = 0.58_real64 + 0.18_real64 * t
-      b = 0.62_real64 + 0.28_real64 * t
+      r = 0.08_real64 + 0.68_real64 * t
+      g = 0.30_real64 + 0.26_real64 * (1.0_real64 - t) + 0.10_real64 * sin(6.28318_real64 * t)
+      b = 0.42_real64 + 0.52_real64 * t
     case default
-      r = 0.12_real64 + 0.88_real64 * t
-      g = 0.78_real64 + 0.10_real64 * t
-      b = 0.86_real64 + 0.08_real64 * (1.0_real64 - t)
+      r = 0.08_real64 + 0.96_real64 * t
+      g = 0.42_real64 + 0.42_real64 * (1.0_real64 - t * 0.35_real64)
+      b = 0.22_real64 + 0.72_real64 * t
     end select
     color = [real(r, c_float), real(g, c_float), real(b, c_float), 1.0_c_float]
   end function palette_color

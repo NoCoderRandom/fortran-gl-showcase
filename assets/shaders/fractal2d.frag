@@ -139,13 +139,21 @@ void main() {
     }
     vec3 base = palette_lookup(mu * 0.024 + u_palette_phase);
     vec3 accent = palette_lookup(mu * 0.024 + u_palette_phase + 0.125);
-    float bright = 0.75 + 1.75 * smoothstep(0.0, 1.0, fract(mu * 0.08));
-    color = mix(base, accent, trap_mix) * bright;
+    vec3 detail = palette_lookup(mu * 0.017 + 0.06 * sin(0.7 * u_time) + u_palette_phase + 0.31);
+    float bright = 0.82 + 1.55 * smoothstep(0.0, 1.0, fract(mu * 0.08));
+    color = mix(mix(base, accent, trap_mix), detail, 0.22) * bright;
   } else {
-    float inner = clamp(0.25 + 0.55 * sin(0.12 * u_time + ds_to_float(x) * 18.0 + ds_to_float(y) * 13.0), 0.0, 1.0);
-    vec3 low = vec3(0.025, 0.03, 0.05);
-    vec3 high = vec3(0.18, 0.17, 0.14);
-    color = mix(low, high, inner);
+    float x_f = ds_to_float(x);
+    float y_f = ds_to_float(y);
+    float swirl = 0.5 + 0.5 * sin(0.11 * u_time + x_f * 15.0 + y_f * 11.0);
+    float veins = 0.5 + 0.5 * cos(0.07 * u_time - x_f * 21.0 + y_f * 16.0);
+    vec3 inner_base = vec3(0.08, 0.05, 0.12);
+    vec3 inner_warm = vec3(0.34, 0.16, 0.08);
+    vec3 inner_cool = vec3(0.16, 0.34, 0.42);
+    vec3 interior = mix(inner_base, inner_warm, swirl);
+    interior = mix(interior, inner_cool, 0.38 * veins);
+    interior += 0.12 * palette_lookup(0.09 * u_time + 0.08 * swirl + 0.03 * veins + u_palette_phase);
+    color = interior;
   }
 
   fragColor = vec4(color, 1.0);

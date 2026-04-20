@@ -42,6 +42,7 @@ add_executable(fortran_gl_showcase
   src/scene/scene_anim_test.f90
   src/scene/scene_combined.f90
   src/scene/empty_scene.f90
+  src/scene/scene_array_landscape.f90
   src/scene/scene_fractal2d.f90
   src/scene/scene_mandelbulb.f90
   src/scene/scene_particles.f90

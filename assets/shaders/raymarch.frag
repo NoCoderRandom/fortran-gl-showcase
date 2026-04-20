@@ -13,12 +13,48 @@ uniform vec3 u_camera_target;
 uniform vec3 u_camera_up;
 uniform int u_fractal_type;
 uniform int u_max_steps;
+uniform int u_variant;
 
 const float max_distance = 24.0;
 const float hit_floor = 0.00008;
 
+mat2 rotation2d(float angle) {
+  float c = cos(angle);
+  float s = sin(angle);
+  return mat2(c, -s, s, c);
+}
+
+vec3 mandelbulb_space(vec3 position) {
+  vec3 p = position;
+  float radial = length(p.xz);
+  if (u_variant == 0) {
+    return position;
+  }
+  p.xz *= rotation2d(0.38 * p.y + 0.22 * sin(1.8 * p.y));
+  p.xz *= 1.0 + 0.10 * exp(-0.55 * radial * radial);
+  p.y *= 0.84;
+  p.x += 0.14 * sin(1.7 * p.y);
+  p.z += 0.10 * cos(1.3 * p.y);
+  if (u_variant == 2) {
+    p.xz *= rotation2d(0.55 + 0.28 * sin(2.2 * p.y));
+    p.x *= 1.08;
+    p.z *= 0.88;
+    p.y += 0.18 * sin(2.8 * radial);
+  }
+  return p;
+}
+
+vec3 spectral_palette(float t) {
+  vec3 a = vec3(0.48, 0.38, 0.32);
+  vec3 b = vec3(0.44, 0.34, 0.30);
+  vec3 c = vec3(1.00, 0.92, 0.74);
+  vec3 d = vec3(0.03, 0.16, 0.31);
+  return a + b * cos(6.28318 * (c * t + d));
+}
+
 vec2 mandelbulb_de(vec3 position) {
-  vec3 z = position;
+  vec3 seed = mandelbulb_space(position);
+  vec3 z = seed;
   float dr = 1.0;
   float radius = 0.0;
   float trapped_iter = 0.0;
@@ -38,7 +74,7 @@ vec2 mandelbulb_de(vec3 position) {
       sin(theta) * cos(phi),
       sin(theta) * sin(phi),
       cos(theta)
-    ) + position;
+    ) + seed;
   }
 
   return vec2(0.5 * log(max(radius, 1e-6)) * radius / dr, trapped_iter);
@@ -68,7 +104,8 @@ vec2 scene_de(vec3 position) {
 }
 
 vec3 mandelbulb_orbit_trap(vec3 position) {
-  vec3 z = position;
+  vec3 seed = mandelbulb_space(position);
+  vec3 z = seed;
   float trap_x = 1e6;
   float trap_y = 1e6;
   float trap_z = 1e6;
@@ -91,7 +128,7 @@ vec3 mandelbulb_orbit_trap(vec3 position) {
       sin(theta) * cos(phi),
       sin(theta) * sin(phi),
       cos(theta)
-    ) + position;
+    ) + seed;
   }
 
   return vec3(
@@ -202,29 +239,60 @@ void main() {
   }
 
   if (!hit) {
-    fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    vec3 sky = mix(vec3(0.01, 0.01, 0.02), vec3(0.05, 0.08, 0.11), clamp(0.5 + 0.5 * ray_dir.y, 0.0, 1.0));
+    fragColor = vec4(sky, 1.0);
     return;
   }
 
   float tone = hit_iteration / 12.0;
-  vec3 bronze = mix(vec3(0.16, 0.10, 0.05), vec3(0.88, 0.70, 0.34), tone);
+  vec3 bronze = mix(vec3(0.18, 0.10, 0.07), vec3(0.92, 0.66, 0.24), tone);
   if (u_fractal_type == 1) {
     bronze = mix(vec3(0.16, 0.14, 0.12), vec3(0.74, 0.68, 0.56), tone);
   }
   vec3 trap = scene_orbit_trap(hit_point);
-  bronze = mix(bronze, vec3(0.26, 0.56, 0.72), 0.35 * trap.x);
-  bronze = mix(bronze, vec3(0.78, 0.50, 0.24), 0.25 * trap.y);
-  bronze += 0.18 * trap.z;
   vec3 normal = estimate_normal(hit_point);
+  float fresnel = pow(clamp(1.0 - dot(normal, -ray_dir), 0.0, 1.0), 3.0);
+  float height_band = 0.5 + 0.5 * sin(hit_point.y * 4.4 + trap.z * 3.2);
+  vec3 spectrum = spectral_palette(0.24 * hit_point.y + 0.55 * tone + 0.18 * trap.x);
+  if (u_fractal_type == 0 && u_variant == 0) {
+    bronze = mix(bronze, vec3(0.26, 0.56, 0.72), 0.35 * trap.x);
+    bronze = mix(bronze, vec3(0.78, 0.50, 0.24), 0.25 * trap.y);
+    bronze += 0.18 * trap.z;
+  } else if (u_fractal_type == 0 && u_variant == 1) {
+    bronze = mix(bronze, spectrum, 0.42);
+    bronze = mix(bronze, vec3(0.18, 0.62, 0.84), 0.22 * trap.x);
+    bronze = mix(bronze, vec3(0.96, 0.30, 0.58), 0.18 * trap.y * height_band);
+    bronze += vec3(0.20, 0.16, 0.10) * trap.z;
+  } else if (u_fractal_type == 0 && u_variant == 2) {
+    bronze = mix(bronze, vec3(0.10, 0.70, 0.92), 0.28 + 0.20 * trap.x);
+    bronze = mix(bronze, vec3(0.98, 0.22, 0.54), 0.16 + 0.22 * height_band);
+    bronze = mix(bronze, spectrum, 0.55);
+    bronze += vec3(0.10, 0.14, 0.20) * trap.z;
+  } else {
+    bronze = mix(bronze, vec3(0.26, 0.56, 0.72), 0.35 * trap.x);
+    bronze = mix(bronze, vec3(0.78, 0.50, 0.24), 0.25 * trap.y);
+    bronze += 0.18 * trap.z;
+  }
   vec3 light_dir = normalize(vec3(0.45, 0.85, 0.28));
   float shadow = soft_shadow(hit_point + normal * 0.004, light_dir, 8.0);
   float ao = ambient_occlusion(hit_point, normal);
   float lambert = max(dot(normal, light_dir), 0.0);
-  vec3 shaded = bronze * ao * (0.10 + 0.90 * lambert * shadow);
+  float rim = fresnel * (0.35 + 0.65 * shadow);
+  vec3 shaded = bronze * ao * (0.12 + 0.88 * lambert * shadow);
   float crease = pow(clamp(tone, 0.0, 1.0), 3.0) * shadow;
   vec3 emissive = vec3(1.8, 1.2, 0.5) * 0.65 * crease;
-  vec3 fog_color = vec3(0.22, 0.17, 0.12);
-  float fog_amount = 1.0 - exp(-0.09 * travel);
+  if (u_fractal_type == 0 && u_variant == 1) {
+    emissive += vec3(0.14, 0.28, 0.44) * (0.35 + 0.65 * height_band) * rim;
+    emissive += spectrum * 0.18 * trap.z;
+  } else if (u_fractal_type == 0 && u_variant == 2) {
+    emissive += vec3(0.22, 0.42, 0.74) * (0.20 + 0.80 * rim);
+    emissive += vec3(0.90, 0.24, 0.52) * 0.12 * trap.y;
+  }
+  shaded += bronze * 0.28 * rim;
+  vec3 fog_color = vec3(0.10, 0.08, 0.10);
+  if (u_fractal_type == 0 && u_variant == 1) fog_color = vec3(0.06, 0.10, 0.14);
+  if (u_fractal_type == 0 && u_variant == 2) fog_color = vec3(0.05, 0.07, 0.13);
+  float fog_amount = 1.0 - exp(-0.08 * travel);
   vec3 color = mix(shaded + emissive, fog_color, clamp(fog_amount, 0.0, 1.0));
   fragColor = vec4(color, 1.0);
 }

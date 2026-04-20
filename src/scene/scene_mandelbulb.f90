@@ -6,7 +6,7 @@ module scene_mandelbulb
   use core_kinds, only: real64
   use core_text_file, only: read_text_file
   use gl_loader, only: gl_uniform1i, gl_uniform2f, gl_uniform3f
-  use platform_input, only: key_1, key_2, key_3, key_escape, key_f, key_h, key_r, mouse_button_left
+  use platform_input, only: key_1, key_2, key_3, key_escape, key_f, key_h, key_r, key_v, mouse_button_left
   use render_fullscreen_quad, only: fullscreen_quad_cache
   use render_shader, only: shader_program
   use scene_base, only: post_settings_t, scene_type, tone_aces
@@ -18,6 +18,10 @@ module scene_mandelbulb
   integer, parameter :: preset_draft = 1
   integer, parameter :: preset_normal = 2
   integer, parameter :: preset_heavy = 3
+  integer, parameter :: mandelbulb_variant_classic = 0
+  integer, parameter :: mandelbulb_variant_cathedral = 1
+  integer, parameter :: mandelbulb_variant_nebula = 2
+  integer, parameter :: mandelbulb_variant_count = 3
 
   public :: mandelbulb_scene_type
   public :: setup_mandelbulb_scene
@@ -31,7 +35,9 @@ module scene_mandelbulb
     integer(c_int) :: fractal_uniform = -1
     integer(c_int) :: max_steps_uniform = -1
     integer(c_int) :: resolution_uniform = -1
+    integer(c_int) :: variant_uniform = -1
     integer :: fractal_kind = fractal_mandelbulb
+    integer :: mandelbulb_variant = mandelbulb_variant_cathedral
     integer :: preset = preset_normal
     logical :: auto_orbit = .true.
     logical :: show_hud = .true.
@@ -73,6 +79,7 @@ contains
     this%camera_up_uniform = this%program%uniform("u_camera_up")
     this%fractal_uniform = this%program%uniform("u_fractal_type")
     this%max_steps_uniform = this%program%uniform("u_max_steps")
+    this%variant_uniform = this%program%uniform("u_variant")
     call reset_camera(this)
   end subroutine mandelbulb_init
 
@@ -124,6 +131,10 @@ contains
       this%show_hud = .not. this%show_hud
       activity = .true.
     end if
+    if (runtime_was_pressed(key_v)) then
+      this%mandelbulb_variant = modulo(this%mandelbulb_variant + 1, mandelbulb_variant_count)
+      activity = .true.
+    end if
     if (runtime_was_pressed(key_r)) then
       call reset_camera(this)
       activity = .true.
@@ -172,10 +183,13 @@ contains
 
   subroutine mandelbulb_render(this)
     class(mandelbulb_scene_type), intent(inout) :: this
+    character(len=*), parameter :: controls_text = &
+      "F TOGGLE  V VARIANT  1/2/3 QUALITY  DRAG ORBIT  WHEEL RADIUS  R RESET  ESC MENU"
     character(len=64) :: fractal_line
     character(len=64) :: orbit_line
     character(len=64) :: preset_line
     character(len=64) :: radius_line
+    character(len=64) :: variant_line
     integer :: height
     integer :: width
     real(real64) :: camera_x
@@ -195,12 +209,14 @@ contains
     call gl_uniform3f(this%camera_up_uniform, 0.0_c_float, 1.0_c_float, 0.0_c_float)
     call gl_uniform1i(this%fractal_uniform, int(this%fractal_kind, c_int))
     call gl_uniform1i(this%max_steps_uniform, int(max_steps_for_preset(this%preset), c_int))
+    call gl_uniform1i(this%variant_uniform, int(this%mandelbulb_variant, c_int))
     call this%quad%draw()
 
     if (runtime_is_offline()) return
     if (.not. this%show_hud) return
     call runtime_text_begin_frame()
     write (fractal_line, '(a,a)') "FRACTAL: ", trim(fractal_name(this%fractal_kind))
+    write (variant_line, '(a,a)') "VARIANT: ", trim(mandelbulb_variant_name(this%fractal_kind, this%mandelbulb_variant))
     write (preset_line, '(a,a)') "PRESET: ", trim(preset_name(this%preset))
     write (radius_line, '(a,f5.2)') "RADIUS: ", this%orbit_radius
     if (this%auto_orbit) then
@@ -208,12 +224,13 @@ contains
     else
       orbit_line = "ORBIT: MANUAL"
     end if
-    call runtime_draw_text(fractal_line, 28, height - 140, 2, [0.96, 0.88, 0.58, 1.0])
+    call runtime_draw_text(fractal_line, 28, height - 172, 2, [0.96, 0.88, 0.58, 1.0])
+    call runtime_draw_text(variant_line, 28, height - 140, 2, [0.88, 0.73, 0.92, 1.0])
     call runtime_draw_text(preset_line, 28, height - 108, 2, [0.84, 0.88, 0.93, 1.0])
     call runtime_draw_text(radius_line, 28, height - 76, 2, [0.84, 0.88, 0.93, 1.0])
     call runtime_draw_text(orbit_line, 28, height - 44, 2, [0.62, 0.67, 0.75, 1.0])
-    call runtime_draw_text("F TOGGLE  1/2/3 QUALITY  DRAG ORBIT  WHEEL RADIUS  R RESET  ESC MENU", &
-      max(24, width - runtime_measure_text("F TOGGLE  1/2/3 QUALITY  DRAG ORBIT  WHEEL RADIUS  R RESET  ESC MENU", 2) - 24), &
+    call runtime_draw_text(controls_text, &
+      max(24, width - runtime_measure_text(controls_text, 2) - 24), &
       height - 44, 2, [0.62, 0.67, 0.75, 1.0])
   end subroutine mandelbulb_render
 
@@ -265,4 +282,23 @@ contains
       name = "Mandelbulb"
     end if
   end function fractal_name
+
+  character(len=16) function mandelbulb_variant_name(fractal_kind, variant) result(name)
+    integer, intent(in), value :: fractal_kind
+    integer, intent(in), value :: variant
+
+    if (fractal_kind /= fractal_mandelbulb) then
+      name = "default"
+      return
+    end if
+
+    select case (variant)
+    case (mandelbulb_variant_classic)
+      name = "classic"
+    case (mandelbulb_variant_nebula)
+      name = "nebula"
+    case default
+      name = "cathedral"
+    end select
+  end function mandelbulb_variant_name
 end module scene_mandelbulb

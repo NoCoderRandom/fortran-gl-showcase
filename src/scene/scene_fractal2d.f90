@@ -22,6 +22,14 @@ module scene_fractal2d
   integer, parameter :: fractal_mandelbrot = 1
   integer, parameter :: fractal_julia = 2
   integer, parameter :: fractal_burning_ship = 3
+  integer, parameter :: autopilot_target_count = 3
+  real(real64), parameter :: min_scale_limit = 5.0e-6_real64
+  real(real64), parameter :: autopilot_target_x(autopilot_target_count) = [ &
+    -0.743643887037151_real64, -0.775683770000000_real64, -0.747178300000000_real64 ]
+  real(real64), parameter :: autopilot_target_y(autopilot_target_count) = [ &
+    0.131825904205330_real64, 0.136467370000000_real64, 0.101848100000000_real64 ]
+  real(real64), parameter :: autopilot_target_scale(autopilot_target_count) = [ &
+    4.5e-3_real64, 1.2e-3_real64, 2.5e-3_real64 ]
 
   public :: fractal2d_scene_type
   public :: setup_fractal2d_scene
@@ -46,7 +54,9 @@ module scene_fractal2d
     integer :: palette_index = 1
     logical :: autopilot_enabled = .true.
     logical :: autopilot_active = .false.
+    integer :: autopilot_target_index = 1
     logical :: show_hud = .true.
+    real(real64) :: autopilot_stage_seconds = 0.0_real64
     real(real64) :: center_x = -0.55_real64
     real(real64) :: center_y = 0.0_real64
     real(real64) :: idle_seconds = 0.0_real64
@@ -219,13 +229,13 @@ contains
       activity = .true.
     end if
     if (runtime_is_down(key_e)) then
-      this%scale = max(1.0e-13_real64, this%scale * exp(-delta_seconds * 1.6_real64))
+      this%scale = max(min_scale_limit, this%scale * exp(-delta_seconds * 1.6_real64))
       activity = .true.
     end if
 
     call runtime_scroll_delta(scroll_dx, scroll_dy)
     if (abs(scroll_dx) > 0.0_c_double .or. abs(scroll_dy) > 0.0_c_double) then
-      this%scale = max(1.0e-13_real64, min(4.0_real64, this%scale * exp(-0.18_real64 * real(scroll_dy, real64))))
+      this%scale = max(min_scale_limit, min(4.0_real64, this%scale * exp(-0.18_real64 * real(scroll_dy, real64))))
       activity = .true.
     end if
 
@@ -241,16 +251,26 @@ contains
     if (activity) then
       this%idle_seconds = 0.0_real64
       this%autopilot_active = .false.
+      this%autopilot_stage_seconds = 0.0_real64
     else
       this%idle_seconds = this%idle_seconds + delta_seconds
       if (this%autopilot_enabled .and. this%idle_seconds >= 5.0_real64) then
         this%autopilot_active = .true.
         this%fractal_kind = fractal_mandelbrot
-        target_x = -0.743643887037151_real64
-        target_y = 0.131825904205330_real64
+        this%autopilot_stage_seconds = this%autopilot_stage_seconds + delta_seconds
+        target_x = autopilot_target_x(this%autopilot_target_index) + 0.0012_real64 * &
+          sin(this%autopilot_stage_seconds * 0.23_real64 + real(this%autopilot_target_index, real64))
+        target_y = autopilot_target_y(this%autopilot_target_index) + 0.0010_real64 * &
+          cos(this%autopilot_stage_seconds * 0.19_real64 + 1.7_real64 * real(this%autopilot_target_index, real64))
         this%center_x = this%center_x + (target_x - this%center_x) * min(1.0_real64, delta_seconds * 0.6_real64)
         this%center_y = this%center_y + (target_y - this%center_y) * min(1.0_real64, delta_seconds * 0.6_real64)
-        this%scale = max(1.0e-12_real64, this%scale * exp(-delta_seconds * 0.55_real64))
+        this%scale = this%scale + (autopilot_target_scale(this%autopilot_target_index) - this%scale) * &
+          min(1.0_real64, delta_seconds * 0.35_real64)
+        this%scale = max(min_scale_limit, this%scale)
+        if (this%autopilot_stage_seconds >= 8.0_real64) then
+          this%autopilot_stage_seconds = 0.0_real64
+          this%autopilot_target_index = mod(this%autopilot_target_index, autopilot_target_count) + 1
+        end if
       end if
     end if
 
@@ -354,6 +374,8 @@ contains
 
     this%idle_seconds = 0.0_real64
     this%autopilot_active = .false.
+    this%autopilot_stage_seconds = 0.0_real64
+    this%autopilot_target_index = 1
     select case (this%fractal_kind)
     case (fractal_mandelbrot)
       this%center_x = -0.55_real64
@@ -374,9 +396,9 @@ contains
     real(real64), intent(in), value :: scale_value
     real(real64) :: zoom_depth
 
-    zoom_depth = max(0.0_real64, -log10(max(scale_value, 1.0e-15_real64)))
-    iter_cap = 256 + int(zoom_depth * 180.0_real64)
-    iter_cap = min(2048, max(256, iter_cap))
+    zoom_depth = max(0.0_real64, -log10(max(scale_value, min_scale_limit)))
+    iter_cap = 224 + int(zoom_depth * 110.0_real64)
+    iter_cap = min(960, max(224, iter_cap))
   end function compute_iteration_cap
 
   character(len=24) function fractal_name(kind) result(name)

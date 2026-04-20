@@ -16,6 +16,7 @@ stay outside the repo.
 | Fractal Explorer | ![Fractal Explorer](docs/gallery/fractal-explorer.png) |
 | Mandelbulb Cathedral | ![Mandelbulb Cathedral](docs/gallery/mandelbulb-cathedral.png) |
 | Particle Galaxy | ![Particle Galaxy](docs/gallery/particle-galaxy.png) |
+| Array Landscape | CPU-built array field lit as signal terrain |
 | Procedural Waves | ![Procedural Waves](docs/gallery/procedural-waves.png) |
 | HDR Bloom Demo | ![HDR Bloom Demo](docs/gallery/hdr-bloom-demo.png) |
 | Tunnel Flythrough | ![Tunnel Flythrough](docs/gallery/tunnel-flythrough.png) |
@@ -119,6 +120,15 @@ but it is much slower, especially for the combined scene.
 | Mouse wheel | Dolly |
 | `H` | Toggle HUD |
 
+### Array Landscape
+
+| Key | Action |
+| --- | --- |
+| `Space` | Pause |
+| `R` | Reset time |
+| `H` | Toggle HUD |
+| `Esc` | Return to menu |
+
 ### Combined Showcase
 
 | Key | Action |
@@ -175,6 +185,13 @@ main raymarching reference in the project.
 A compute-driven particle field rendered with additive point sprites and
 scene presets. It is designed as both a standalone scene and one act of
 the combined showcase.
+
+### Array Landscape
+
+A fullscreen scene where dense 2D fields are synthesized in Fortran with
+whole-array math, `spread`, and neighbor operations before OpenGL shades
+the result as a lit relief map. It is intended to show off array-centric
+numeric work rather than just fragment-shader tricks.
 
 ### Procedural Waves
 

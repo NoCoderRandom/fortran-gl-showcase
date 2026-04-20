@@ -100,11 +100,11 @@ float hash1(float n) {
 
 vec3 preset_color(float t) {
   if (u_preset_mix < 0.5) {
-    return mix(vec3(0.10, 0.92, 0.98), vec3(1.0, 0.85, 0.94), t);
+    return mix(vec3(0.06, 0.70, 0.88), vec3(1.00, 0.78, 0.28), t);
   } else if (u_preset_mix < 1.5) {
-    return mix(vec3(0.45, 0.10, 0.02), vec3(1.0, 0.78, 0.20), t);
+    return mix(vec3(0.30, 0.04, 0.08), vec3(1.00, 0.46, 0.16), t);
   }
-  return mix(vec3(0.10, 0.78, 0.74), vec3(0.56, 0.28, 0.86), t);
+  return mix(vec3(0.08, 0.32, 0.72), vec3(0.92, 0.30, 0.78), t);
 }
 
 void respawn(uint index) {
@@ -140,7 +140,8 @@ void main() {
   vec3 tangent = normalize(vec3(-position.z, 0.0, position.x) + vec3(1e-4));
   vec3 force = radial * (2.4 * mass / (radius * radius + 0.12));
   force += tangent * mix(0.35, 0.80, u_preset_mix / 2.0);
-  force += curl_noise(position * 0.33 + vec3(0.0, 0.0, u_seed * 0.01 + p.position_age.w * 0.08)) * 0.22;
+  float noise_strength = mix(0.12, 0.18, u_preset_mix / 2.0);
+  force += curl_noise(position * 0.28 + vec3(0.0, 0.0, u_seed * 0.01 + p.position_age.w * 0.08)) * noise_strength;
   velocity += force * u_delta_seconds;
   velocity *= exp(-u_drag * u_delta_seconds);
   position += velocity * u_delta_seconds;

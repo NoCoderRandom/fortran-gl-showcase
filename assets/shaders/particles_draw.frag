@@ -12,7 +12,8 @@ void main() {
   if (radius2 > 1.0) discard;
 
   vec3 palette = texture(u_palette, vec2(v_age, 0.5)).rgb;
-  float falloff = exp(-3.6 * radius2);
-  vec3 color = palette * v_color.rgb * mix(1.4, 5.2, falloff);
-  fragColor = vec4(color, falloff * max(v_color.a, 0.08));
+  float falloff = exp(-4.8 * radius2);
+  float core = exp(-18.0 * radius2);
+  vec3 color = palette * v_color.rgb * (0.18 + 0.95 * falloff + 0.55 * core);
+  fragColor = vec4(color, (0.42 * falloff + 0.16 * core) * max(v_color.a, 0.08));
 }

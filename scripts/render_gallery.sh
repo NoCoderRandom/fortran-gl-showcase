@@ -15,6 +15,7 @@ scenes=(
   fractal_explorer
   mandelbulb_cathedral
   particle_galaxy
+  array_landscape
   procedural_waves
   hdr_bloom_demo
   tunnel_flythrough

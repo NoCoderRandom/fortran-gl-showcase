@@ -26,6 +26,7 @@ module platform_input
   integer(c_int), parameter, public :: key_right_bracket = 93_c_int
   integer(c_int), parameter, public :: key_space = 32_c_int
   integer(c_int), parameter, public :: key_t = 84_c_int
+  integer(c_int), parameter, public :: key_v = 86_c_int
   integer(c_int), parameter, public :: key_w = 87_c_int
   integer(c_int), parameter, public :: key_s = 83_c_int
   integer(c_int), parameter, public :: key_f11 = 300_c_int

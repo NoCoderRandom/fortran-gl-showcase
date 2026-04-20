@@ -1,4 +1,5 @@
 module scene_registry
+  use scene_array_landscape, only: setup_array_landscape_scene
   use scene_anim_test, only: setup_anim_test_scene
   use scene_combined, only: setup_combined_scene
   use scene_fractal2d, only: setup_fractal2d_scene
@@ -46,7 +47,7 @@ contains
   subroutine scene_registry_register_defaults(this)
     class(scene_registry_type), intent(inout) :: this
 
-    this%count = 8
+    this%count = 9
     call set_entry_metadata(this%entries(1), "fractal_explorer", "Fractal Explorer", "Mandelbrot / Julia / Burning Ship", .true.)
     this%entries(1)%factory => make_fractal_explorer
     call set_entry_metadata(this%entries(2), "mandelbulb_cathedral", "Mandelbulb Cathedral", &
@@ -65,6 +66,9 @@ contains
     this%entries(7)%factory => make_color_field
     call set_entry_metadata(this%entries(8), "combined_showcase", "Combined Showcase", "flagship animated piece", .true.)
     this%entries(8)%factory => make_combined_showcase
+    call set_entry_metadata(this%entries(9), "array_landscape", "Array Landscape", &
+      "Fortran array math driving a lit signal field", .true.)
+    this%entries(9)%factory => make_array_landscape
   end subroutine scene_registry_register_defaults
 
   subroutine scene_registry_create(this, name, scene)
@@ -196,6 +200,12 @@ contains
 
     call setup_combined_scene(scene)
   end subroutine make_combined_showcase
+
+  subroutine make_array_landscape(scene)
+    class(scene_type), allocatable, intent(out) :: scene
+
+    call setup_array_landscape_scene(scene)
+  end subroutine make_array_landscape
 
   subroutine make_anim_test(scene)
     class(scene_type), allocatable, intent(out) :: scene
